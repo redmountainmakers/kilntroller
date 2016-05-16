@@ -1,0 +1,6 @@
+{
+    "dependencies" : {
+        "express"    : "^4.13.4",
+        "serialport" : "^3.1.2"
+    }
+}
