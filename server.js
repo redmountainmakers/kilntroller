@@ -91,7 +91,6 @@ server = app.listen(3000, function() {
         console.log();
         controller.close(function(err) {
             if (err) throw err;
-            console.log('serial port closed');
             server.close(function(err) {
                 if (err) throw err;
                 console.log('HTTP server closed');
