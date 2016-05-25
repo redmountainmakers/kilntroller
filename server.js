@@ -60,6 +60,25 @@ app.post('/set', function(req, res) {
     }
 });
 
+app.get('/tunings', function(req, res) {
+    res.json(controller.getTunings());
+});
+
+app.post('/tunings', function(req, res) {
+    var Kp = parseFloat(req.body.Kp),
+        Ki = parseFloat(req.body.Ki),
+        Kd = parseFloat(req.body.Kd);
+    if (isNaN(Kp) || isNaN(Ki) || isNaN(Kd)) {
+        res.status(400).json({
+            ok    : false,
+            error : "Parameters 'Kp', 'Ki', and 'Kd' must be numbers"
+        });
+    } else {
+        controller.setTunings(Kp, Ki, Kd);
+        res.json({ ok : true });
+    }
+});
+
 server = app.listen(3000, function() {
     console.log('listening on :3000');
 
