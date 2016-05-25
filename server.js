@@ -1,12 +1,23 @@
-var express = require('express');
+var bodyParser = require('body-parser'),
+    express    = require('express');
 
 var Controller = require('./lib/controller');
 
 var app = express(),
     controller, server;
 
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// parse application/json
+app.use(bodyParser.json());
+
 app.get('/status', function(req, res) {
     res.json(controller.getStatus());
+});
+
+app.get('/history', function(req, res) {
+    res.json(controller.getHistory());
 });
 
 function sendCommandResponse(err, res) {
@@ -30,6 +41,19 @@ app.post('/off', function(req, res) {
     controller.disableRelays(function(err) {
         sendCommandResponse(err, res);
     });
+});
+
+app.post('/set', function(req, res) {
+    var temperature = parseFloat(req.body.temperature);
+    if (isNaN(temperature) || temperature < 0) {
+        res.status(400).json({
+            ok    : false,
+            error : "Parameter 'temperature' must be a non-negative number"
+        });
+    } else {
+        controller.setTargetTemperature(temperature);
+        res.json({ ok : true });
+    }
 });
 
 server = app.listen(3000, function() {
