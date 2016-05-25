@@ -1,10 +1,14 @@
 var bodyParser = require('body-parser'),
+    cors       = require('cors'),
     express    = require('express');
 
 var Controller = require('./lib/controller');
 
 var app = express(),
     controller, server;
+
+// enable cross-origin requests
+app.use(cors());
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
