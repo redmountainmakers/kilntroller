@@ -91,10 +91,7 @@ server = app.listen(3000, function() {
         console.log();
         controller.close(function(err) {
             if (err) throw err;
-            server.close(function(err) {
-                if (err) throw err;
-                console.log('HTTP server closed');
-            });
+            process.exit(); // HTTP server probably won't close
         });
     });
 });
