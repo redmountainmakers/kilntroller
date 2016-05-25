@@ -1,76 +1,48 @@
-var express = require('express'),
-    serial  = require('serialport');
+var express = require('express');
 
-var app    = express(),
-    status = { raw : {}, computed : {} },
-    port,
-    server;
+var Controller = require('./lib/controller');
 
-function sendCommand(command, res) {
-    port.write(command + '\r\n', function(err) {
-        if (err) {
-            res.status(500).send(err.message + '\n');
-        } else {
-            res.send('Command OK: ' + command + '\n');
-        }
-    });
-}
+var app = express(),
+    controller, server;
 
-app.get('/', function(req, res) {
-    res.json(status);
+app.get('/status', function(req, res) {
+    res.json(controller.getStatus());
 });
 
+function sendCommandResponse(err, res) {
+    if (err) {
+        res.status(500).json({
+            ok    : false,
+            error : err.message
+        });
+    } else {
+        res.json({ ok : true });
+    }
+}
+
 app.post('/on', function(req, res) {
-    sendCommand('ON', res);
+    controller.enableRelays(function(err) {
+        sendCommandResponse(err, res);
+    });
 });
 
 app.post('/off', function(req, res) {
-    sendCommand('OFF', res);
+    controller.disableRelays(function(err) {
+        sendCommandResponse(err, res);
+    });
 });
 
 server = app.listen(3000, function() {
     console.log('listening on :3000');
 
-    port = new serial.SerialPort('/dev/ttyACM0', {
-        baudRate : 115200,
-        parser   : serial.parsers.readline('\n')
-    });
-
-    port.on('open', function() {
-        // Clear the command buffer
-        port.write('\r\n\r\n', function(err) {
-            if (err) throw err;
-            console.log('serial port open');
-        });
-    });
-
-    var isFirstLine = true;
-    port.on('data', function(line) {
-        if (!isFirstLine) {
-            line = line.trim();
-            process.stdout.write('rx: ' + line + '\n');
-            var match = line.match(/^([A-Z0-9]+)=([0-9]+) /);
-            if (match) {
-                var name  = match[1],
-                    value = +match[2];
-                status.raw[name] = value;
-                if (/^T/.test(name)) {
-                    if (name in status.computed) {
-                        status.computed[name] =
-                            status.computed[name] * 4 / 5 +
-                            value / 100 * 1 / 5;
-                    } else {
-                        status.computed[name] = value / 100;
-                    }
-                }
-            }
-        }
-        isFirstLine = false;
+    controller = new Controller('/dev/ttyACM0');
+    controller.on('log', function(msg) {
+        console.log(msg);
     });
 
     process.on('SIGINT', function() {
         console.log();
-        port.close(function(err) {
+        controller.close(function(err) {
             if (err) throw err;
             console.log('serial port closed');
             server.close(function(err) {
