@@ -3,7 +3,8 @@ var bodyParser = require('body-parser'),
     express    = require('express');
 
 var config       = require('./lib/config'),
-    Controller   = require('./lib/Controller');
+    Controller   = require('./lib/Controller'),
+    SSHDataRelay = require('./lib/SSHDataRelay');
 
 var app = express(),
     controller, server;
@@ -88,8 +89,14 @@ server = app.listen(config.httpPort, function() {
         console.log(msg);
     });
 
+    ssh = new SSHDataRelay(config.ssh, controller);
+    ssh.on('log', function(msg) {
+        console.log(msg);
+    });
+
     process.on('SIGINT', function() {
         console.log();
+        ssh.close();
         controller.close(function(err) {
             if (err) throw err;
             process.exit(); // HTTP server probably won't close

@@ -1,2 +1,7 @@
 serialPort : /dev/ttyACM0
 httpPort   : 3000
+ssh        :
+    hostname     : kiln-server
+    user         : kiln
+    identityFile : /home/user/.ssh/kiln_server_rsa
+    intakePath   : ~/code/bin/intake.js
