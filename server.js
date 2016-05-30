@@ -84,7 +84,7 @@ app.post('/tunings', function(req, res) {
 server = app.listen(config.httpPort, function() {
     console.log('listening on :' + config.httpPort);
 
-    controller = new Controller(config.serialPort);
+    controller = new Controller(config.serialPort, config.pidTunings);
     controller.on('log', function(msg) {
         console.log(msg);
     });

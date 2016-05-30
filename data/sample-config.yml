@@ -1,6 +1,10 @@
 serialPort : /dev/ttyACM0
 httpPort   : 3000
-ssh        :
+pidTunings :
+    Kp : 400
+    Ki : 100
+    Kd : 30
+ssh :
     hostname     : kiln-server
     user         : kiln
     identityFile : /home/user/.ssh/kiln_server_rsa
