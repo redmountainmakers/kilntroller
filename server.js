@@ -2,8 +2,8 @@ var bodyParser = require('body-parser'),
     cors       = require('cors'),
     express    = require('express');
 
-var config     = require('./lib/config'),
-    Controller = require('./lib/controller');
+var config       = require('./lib/config'),
+    Controller   = require('./lib/Controller');
 
 var app = express(),
     controller, server;
