@@ -113,12 +113,12 @@ server = app.listen(config.httpPort, function() {
         console.log(msg);
     });
 
-    dataRelay = new SSHDataRelay(config.ssh, controller);
+    scheduler = new Scheduler(settings, controller);
+
+    dataRelay = new SSHDataRelay(config.ssh, controller, scheduler);
     dataRelay.on('log', function(msg) {
         console.log(msg);
     });
-
-    scheduler = new Scheduler(settings, controller);
 
     process.on('SIGINT', function() {
         console.log();
