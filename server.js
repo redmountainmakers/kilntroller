@@ -123,9 +123,7 @@ server = app.listen(config.httpPort, function() {
     process.on('SIGINT', function() {
         console.log();
         dataRelay.close();
-        controller.close(function(err) {
-            if (err) throw err;
-            process.exit(); // HTTP server probably won't close
-        });
+        controller.close();
+        process.exit(); // HTTP server probably won't close
     });
 });
