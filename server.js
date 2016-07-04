@@ -4,10 +4,11 @@ var bodyParser = require('body-parser'),
 
 var config       = require('./lib/config'),
     Controller   = require('./lib/Controller'),
-    SSHDataRelay = require('./lib/SSHDataRelay');
+    SSHDataRelay = require('./lib/SSHDataRelay'),
+    Scheduler    = require('./lib/Scheduler');
 
 var app = express(),
-    controller, server;
+    server, controller, dataRelay, scheduler;
 
 // enable cross-origin requests
 app.use(cors());
@@ -81,22 +82,47 @@ app.post('/tunings', function(req, res) {
     }
 });
 
+app.get('/schedule', function(req, res) {
+    res.json(scheduler.getStatus());
+});
+
+app.post('/schedule', function(req, res) {
+    try {
+        scheduler.setSchedule(req.body.schedule);
+        res.json({ ok : true });
+    } catch (err) {
+        res.json({
+            ok    : false,
+            error : err.message
+        });
+    }
+});
+
 server = app.listen(config.httpPort, function() {
     console.log('listening on :' + config.httpPort);
 
-    controller = new Controller(config.serialPort, config.pidTunings);
+    var settings = {
+        deviceName     : config.serialPort,
+        pidTunings     : config.pidTunings,
+        minTemperature : config.temperatures.min,
+        maxTemperature : config.temperatures.max
+    };
+
+    controller = new Controller(settings);
     controller.on('log', function(msg) {
         console.log(msg);
     });
 
-    ssh = new SSHDataRelay(config.ssh, controller);
-    ssh.on('log', function(msg) {
+    dataRelay = new SSHDataRelay(config.ssh, controller);
+    dataRelay.on('log', function(msg) {
         console.log(msg);
     });
 
+    scheduler = new Scheduler(settings, controller);
+
     process.on('SIGINT', function() {
         console.log();
-        ssh.close();
+        dataRelay.close();
         controller.close(function(err) {
             if (err) throw err;
             process.exit(); // HTTP server probably won't close

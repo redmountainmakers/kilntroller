@@ -1,5 +1,8 @@
-serialPort : /dev/ttyACM0
-httpPort   : 3000
+serialPort   : /dev/ttyACM0
+httpPort     : 3000
+temperatures :
+    min : 20   # approx room temperature
+    max : 1260 # 3200 deg F
 pidTunings :
     Kp : 400
     Ki : 100
