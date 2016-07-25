@@ -11,7 +11,16 @@ var app = express(),
     server, controller, dataRelay, scheduler;
 
 // enable cross-origin requests
-app.use(cors());
+app.use(cors(function(req, callback) {
+    var origin      = req.header('Origin'),
+        corsAllowed = false;
+    if (/^http:\/\/localhost:\d+$/.test(origin)) {
+        corsAllowed = true;
+    } else if (/^https?:\/\/(www\.)?redmountainmakers\.org$/.test(origin)) {
+        corsAllowed = true;
+    }
+    callback(null, { origin : corsAllowed });
+}));
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
