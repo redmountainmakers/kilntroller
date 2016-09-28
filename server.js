@@ -97,7 +97,11 @@ app.get('/schedule', function(req, res) {
 
 app.post('/schedule', function(req, res) {
     try {
-        scheduler.setSchedule(req.body.schedule);
+        if (req.body.schedule === null) {
+            scheduler.clearSchedule();
+        } else {
+            scheduler.setSchedule(req.body.schedule);
+        }
         res.json({ ok : true });
     } catch (err) {
         res.json({
